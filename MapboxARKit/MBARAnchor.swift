@@ -22,10 +22,10 @@ internal extension simd_float4x4 {
         var distance = Float(location.distance(from: originLocation))
         
         // Workaround to set the minum size of the node. Enforce the distance if distance is over than 200m
-        if distance > 200 {
-           distance = 200
+        if distance > 300 {
+           distance = 300
         }
-        
+
         if distance < 50 {
             distance = 50
         }

@@ -38,7 +38,7 @@ open class AnnotationManager: NSObject {
             return
         }
         
-        guard let location = annotation.location else {
+        guard annotation.location != nil else {
             print("annotation's location is missing :: \(dump(annotation))")
             return
         }
@@ -72,7 +72,6 @@ open class AnnotationManager: NSObject {
             })
         }
         
-        
         annotationsByNode.removeAll()
         anchors.removeAll()
         
@@ -92,7 +91,7 @@ open class AnnotationManager: NSObject {
     public func removeAnnotation(annotation: Annotation) {
         if let anchor = annotation.anchor {
             session?.remove(anchor: anchor)
-            anchors.remove(at: anchors.index(of: anchor)!)
+            anchors.remove(at: anchors.firstIndex(of: anchor)!)
             
             for e in annotationsByAnchor {
                 e.value.calloutImage = nil
