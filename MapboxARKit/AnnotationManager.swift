@@ -5,7 +5,6 @@ import CoreLocation
 @objc public protocol AnnotationManagerDelegate {
     
     @objc optional func node(for annotation: Annotation) -> SCNNode?
-    @objc optional func scaleNode(node: SCNNode, location: CLLocation) -> SCNNode?
     @objc optional func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera)
     
 }
@@ -109,14 +108,6 @@ open class AnnotationManager: NSObject {
         }
     }
     
-    open func addNode(newNode: SCNNode, annotation: Annotation) {
-        
-        if let calloutImage = annotation.calloutImage {
-            let calloutNode = createCalloutNode(with: calloutImage, node: newNode)
-            newNode.addChildNode(calloutNode)
-        }
-    }
-    
     public func addNodeDirectly(nodeToAdd: SCNNode, anchor: ARAnchor) {
         nodesAddedDirectlyByAnchor[anchor] = nodeToAdd
         session?.add(anchor: anchor)
@@ -155,14 +146,7 @@ extension AnnotationManager: ARSCNViewDelegate {
                 newNode = createDefaultNode()
             }
             
-            let scaledNode = delegate?.scaleNode?(node: newNode, location: annotation.location!)
-            if scaledNode != nil {
-                newNode = scaledNode
-            }
-            addNode(newNode: newNode, annotation: annotation)
-            
             node.addChildNode(newNode)
-
             annotationsByNode[newNode] = annotation
         } else {
             if nodesAddedDirectlyByAnchor.isEmpty == false && nodesAddedDirectlyByAnchor[anchor] != nil {
@@ -176,40 +160,9 @@ extension AnnotationManager: ARSCNViewDelegate {
     // MARK: - Utility methods for ARSCNViewDelegate
     
     func createDefaultNode() -> SCNNode {
-        let geometry = SCNSphere(radius: 0.2)
+        let geometry = SCNSphere(radius: 10)
         geometry.firstMaterial?.diffuse.contents = UIColor.red
         return SCNNode(geometry: geometry)
-    }
-    
-    func createCalloutNode(with image: UIImage, node: SCNNode) -> SCNNode {
-        
-        var width: CGFloat = 0.0
-        var height: CGFloat = 0.0
-        
-        if image.size.width >= image.size.height {
-            width = image.size.width / image.size.height
-            height = 1.0
-        } else {
-            width = 1.0
-            height = image.size.height / image.size.width
-        }
-        
-        let calloutGeometry = SCNPlane(width: width, height: height)
-        calloutGeometry.firstMaterial?.diffuse.contents = image
-        
-        let calloutNode = SCNNode(geometry: calloutGeometry)
-        var nodePosition = node.position
-        let (min, max) = node.boundingBox
-        let nodeHeight = max.y - min.y
-        nodePosition.y = nodeHeight + 0.5
-        
-        calloutNode.position = nodePosition
-        
-        let constraint = SCNBillboardConstraint()
-        constraint.freeAxes = [.Y]
-        calloutNode.constraints = [constraint]
-        
-        return calloutNode
     }
     
 }
