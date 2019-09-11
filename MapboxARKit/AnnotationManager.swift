@@ -75,7 +75,6 @@ open class AnnotationManager: NSObject {
         anchors.removeAll()
         
         for e in annotationsByAnchor {
-            e.value.calloutImage = nil
             e.value.location = nil
         }
         annotationsByAnchor.removeAll()
@@ -93,7 +92,6 @@ open class AnnotationManager: NSObject {
             anchors.remove(at: anchors.firstIndex(of: anchor)!)
             
             for e in annotationsByAnchor {
-                e.value.calloutImage = nil
                 e.value.location = nil
             }
             
