@@ -31,7 +31,7 @@ open class AnnotationManager: NSObject {
         sceneView.delegate = self
     }
     
-    public func addAnnotation(annotation: Annotation) {
+    open func addAnnotation(annotation: Annotation) {
         guard let originLocation = originLocation else {
             print("Warning: \(type(of: self)).\(#function) was called without first setting \(type(of: self)).originLocation")
             return
@@ -43,12 +43,18 @@ open class AnnotationManager: NSObject {
         }
         // Create a Mapbox AR anchor anchor at the transformed position
         let anchor = MBARAnchor(originLocation: originLocation, location: annotation.location!)
-
+        
+        annotation.anchor = anchor
+        
+        addAnnotationAnchorToARSession(annotation: annotation)
+    }
+    
+    public func addAnnotationAnchorToARSession(annotation: Annotation) {
+        guard let anchor = annotation.anchor else { return }
         // Add the anchor to the session
         session?.add(anchor: anchor)
         
         anchors.append(anchor)
-        annotation.anchor = anchor
         annotationsByAnchor[anchor] = annotation
     }
     
