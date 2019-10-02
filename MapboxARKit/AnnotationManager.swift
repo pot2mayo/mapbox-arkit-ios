@@ -111,7 +111,7 @@ open class AnnotationManager: NSObject {
             node.isHidden = isHidden
         }
     }
-    
+
     public func addNodeDirectly(nodeToAdd: SCNNode, anchor: ARAnchor) {
         nodesAddedDirectlyByAnchor[anchor] = nodeToAdd
         session?.add(anchor: anchor)
@@ -121,6 +121,15 @@ open class AnnotationManager: NSObject {
         for (key, _) in nodesAddedDirectlyByAnchor {
             session?.remove(anchor: key)
         }
+    }
+
+    public func setAnchorDistance(max: Float?, min: Float?) {
+        if max != nil { MBARAnchor.ANCHOR_DISTANCE_MAX = max! }
+        if min != nil { MBARAnchor.ANCHOR_DISTANCE_MIN = min! }
+    }
+    
+    public func getAnchorDistance() -> (max: Float, min: Float) {
+        return (max: MBARAnchor.ANCHOR_DISTANCE_MAX, min: MBARAnchor.ANCHOR_DISTANCE_MIN)
     }
 }
 
