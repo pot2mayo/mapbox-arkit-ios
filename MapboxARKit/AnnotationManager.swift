@@ -18,7 +18,6 @@ open class AnnotationManager: NSObject {
     public private(set) var annotationsByNode = [SCNNode: Annotation]()
     public var delegate: AnnotationManagerDelegate?
     public var originLocation: CLLocation?
-    private var nodesAddedDirectlyByAnchor: [ARAnchor: SCNNode] = [:]
     
     public init(session: ARSession) {
         self.session = session
@@ -112,15 +111,13 @@ open class AnnotationManager: NSObject {
         }
     }
     
-    public func addNodeDirectly(nodeToAdd: SCNNode, anchor: ARAnchor) {
-        nodesAddedDirectlyByAnchor[anchor] = nodeToAdd
-        session?.add(anchor: anchor)
+    public func setAnchorDistance(max: Float?, min: Float?) {
+        if max != nil { MBARAnchor.ANCHOR_DISTANCE_MAX = max! }
+        if min != nil { MBARAnchor.ANCHOR_DISTANCE_MIN = min! }
     }
     
-    public func removeDirectlyAddedNodes() {
-        for (key, _) in nodesAddedDirectlyByAnchor {
-            session?.remove(anchor: key)
-        }
+    public func getAnchorDistance() -> (max: Float, min: Float) {
+        return (max: MBARAnchor.ANCHOR_DISTANCE_MAX, min: MBARAnchor.ANCHOR_DISTANCE_MIN)
     }
 }
 
@@ -152,10 +149,6 @@ extension AnnotationManager: ARSCNViewDelegate {
             
             node.addChildNode(newNode)
             annotationsByNode[newNode] = annotation
-        } else {
-            if nodesAddedDirectlyByAnchor.isEmpty == false && nodesAddedDirectlyByAnchor[anchor] != nil {
-                node.addChildNode(nodesAddedDirectlyByAnchor[anchor]!)
-            }
         }
         
         // TODO: let delegate provide a node for a non-MBARAnchor

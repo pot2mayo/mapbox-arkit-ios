@@ -4,7 +4,9 @@ import Turf
 
 public class MBARAnchor: ARAnchor {
     
-    public var calloutString: String?
+    // To controll the max & min size of the node
+    public static var ANCHOR_DISTANCE_MAX:Float = 300
+    public static var ANCHOR_DISTANCE_MIN:Float = 50
     
     public convenience init(originLocation: CLLocation, location: CLLocation) {        
         let transform = matrix_identity_float4x4.transformMatrix(originLocation: originLocation, location: location)
@@ -22,12 +24,12 @@ internal extension simd_float4x4 {
         var distance = Float(location.distance(from: originLocation))
         
         // Workaround to set the minum size of the node. Enforce the distance if distance is over than 200m
-        if distance > 300 {
-           distance = 300
+        if distance > MBARAnchor.ANCHOR_DISTANCE_MAX {
+           distance = MBARAnchor.ANCHOR_DISTANCE_MAX
         }
 
-        if distance < 50 {
-            distance = 50
+        if distance < MBARAnchor.ANCHOR_DISTANCE_MIN {
+            distance = MBARAnchor.ANCHOR_DISTANCE_MIN
         }
         
         let bearing = GLKMathDegreesToRadians(Float(originLocation.coordinate.direction(to: location.coordinate)))
