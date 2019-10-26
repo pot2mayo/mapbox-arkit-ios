@@ -5,8 +5,8 @@ import Turf
 public class MBARAnchor: ARAnchor {
     
     // To controll the max & min size of the node
-    public static var ANCHOR_DISTANCE_MAX:Float = 300
-    public static var ANCHOR_DISTANCE_MIN:Float = 50
+    public static var ANCHOR_DISTANCE_MAX:Float = 250 // 300
+    public static var ANCHOR_DISTANCE_MIN:Float = 120 // 50
     
     public convenience init(originLocation: CLLocation, location: CLLocation) {        
         let transform = matrix_identity_float4x4.transformMatrix(originLocation: originLocation, location: location)
