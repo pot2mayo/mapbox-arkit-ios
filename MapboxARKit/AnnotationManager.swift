@@ -2,13 +2,6 @@ import ARKit
 import SpriteKit
 import CoreLocation
 
-@objc public protocol AnnotationManagerDelegate {
-    
-    @objc optional func node(for annotation: Annotation) -> SCNNode?
-    @objc optional func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera)
-    
-}
-
 open class AnnotationManager: NSObject {
     
     public private(set) weak var session: ARSession?
@@ -16,15 +9,15 @@ open class AnnotationManager: NSObject {
     public private(set) var anchors = [ARAnchor]()
     public private(set) var annotationsByAnchor = [ARAnchor: Annotation]()
     public private(set) var annotationsByNode = [SCNNode: Annotation]()
-    public var delegate: AnnotationManagerDelegate?
     public var originLocation: CLLocation?
     
     public init(session: ARSession) {
         self.session = session
     }
     
-    convenience public init(sceneView: ARSCNView) {
-        self.init(session: sceneView.session)
+    public init(sceneView: ARSCNView) {
+        super.init()
+        self.session = sceneView.session
         self.sceneView = sceneView
         session = sceneView.session
         sceneView.delegate = self
@@ -46,6 +39,10 @@ open class AnnotationManager: NSObject {
         annotation.anchor = anchor
         
         addAnnotationAnchorToARSession(annotation: annotation)
+    }
+    
+    open func createNode(for annotation: Annotation) -> SCNNode? {
+        return nil
     }
     
     public func addAnnotationAnchorToARSession(annotation: Annotation) {
@@ -125,10 +122,6 @@ open class AnnotationManager: NSObject {
 
 extension AnnotationManager: ARSCNViewDelegate {
     
-    public func session(_ session: ARSession, cameraDidChangeTrackingState camera: ARCamera) {
-        delegate?.session?(session, cameraDidChangeTrackingState: camera)
-    }
-    
     public func renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) {
         
         // Handle MBARAnchor
@@ -141,7 +134,7 @@ extension AnnotationManager: ARSCNViewDelegate {
             var newNode: SCNNode!
             
             // If the delegate supplied a node then use that, otherwise provide a basic default node
-            if let suppliedNode = delegate?.node?(for: annotation) {
+            if let suppliedNode = self.createNode(for: annotation) {
                 newNode = suppliedNode
             } else {
                 newNode = createDefaultNode()
