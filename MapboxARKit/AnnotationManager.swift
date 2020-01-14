@@ -41,6 +41,7 @@ open class AnnotationManager: NSObject {
         addAnnotationAnchorToARSession(annotation: annotation)
     }
     
+    // If it is nil, default node will be created.
     open func createNode(for annotation: Annotation) -> SCNNode? {
         return nil
     }
