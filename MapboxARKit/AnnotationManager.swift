@@ -15,12 +15,61 @@ open class AnnotationManager: NSObject {
         self.session = session
     }
     
+    var orientation: SCNQuaternion? = nil
+    var pos: SCNVector3? = nil
+    
     public init(sceneView: ARSCNView) {
         super.init()
         self.session = sceneView.session
         self.sceneView = sceneView
+        self.sceneView?.allowsCameraControl = true
+        
+        print("🙂 🙂 🙂 🙂 🙂 sceneView!.pointOfView!.orientation :: \(sceneView.pointOfView?.orientation)")
+        
+//        SKCameraNode
         session = sceneView.session
         sceneView.delegate = self
+        
+        
+        if let cameraNode = self.sceneView?.pointOfView {
+            let dir = calculateCameraDirection(cameraNode: cameraNode)
+            self.pos = pointInFrontOfPoint(point: cameraNode.position, direction: dir, distance: 8)
+            self.orientation = cameraNode.orientation
+        }
+    }
+
+    func pointInFrontOfPoint(point: SCNVector3, direction: SCNVector3, distance: Float) -> SCNVector3 {
+        var x = Float()
+        var y = Float()
+        var z = Float()
+
+        x = point.x + distance * direction.x
+        y = point.y + distance * direction.y
+        z = point.z + distance * direction.z
+
+        let result = SCNVector3Make(x, y, z)
+        return result
+    }
+
+    func calculateCameraDirection(cameraNode: SCNNode) -> SCNVector3 {
+        let x = -cameraNode.rotation.x
+        let y = -cameraNode.rotation.y
+        let z = -cameraNode.rotation.z
+        let w = cameraNode.rotation.w
+        let cameraRotationMatrix = GLKMatrix3Make(cos(w) + pow(x, 2) * (1 - cos(w)),
+                                                  x * y * (1 - cos(w)) - z * sin(w),
+                                                  x * z * (1 - cos(w)) + y*sin(w),
+
+                                                  y*x*(1-cos(w)) + z*sin(w),
+                                                  cos(w) + pow(y, 2) * (1 - cos(w)),
+                                                  y*z*(1-cos(w)) - x*sin(w),
+
+                                                  z*x*(1 - cos(w)) - y*sin(w),
+                                                  z*y*(1 - cos(w)) + x*sin(w),
+                                                  cos(w) + pow(z, 2) * ( 1 - cos(w)))
+
+        let cameraDirection = GLKMatrix3MultiplyVector3(cameraRotationMatrix, GLKVector3Make(0.0, 0.0, -1.0))
+        return SCNVector3FromGLKVector3(cameraDirection)
     }
     
     open func addAnnotation(annotation: Annotation) {
@@ -141,7 +190,22 @@ extension AnnotationManager: ARSCNViewDelegate {
                 newNode = createDefaultNode()
             }
             
+            print("🙂 🙂 🙂 🙂 🙂 111 node.orientation :: \(node.orientation), scene.rootNode.camera :: \(sceneView?.scene.rootNode.camera)")
+            print("🙂 🙂 🙂 🙂 🙂 2222 sceneView!.pointOfView!.orientation :: \(sceneView?.pointOfView!.orientation)")
+            print("🙂 🙂 🙂 🙂 🙂 333 newNode.orientation :: \(newNode.orientation)")
+//            newNode.simdTransform = anchor.transform
+//            node.orientation = sceneView!.pointOfView!.orientation
+            
+            if pos != nil {
+                newNode.position = pos!
+            }
+            if orientation != nil {
+                newNode.orientation = orientation!
+            }
+            
             node.addChildNode(newNode)
+//            node.simdTransform = anchor.transform
+            
             annotationsByNode[newNode] = annotation
         }
         
